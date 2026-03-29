@@ -15,14 +15,17 @@ npm run preview  # Preview production build
 
 ## Architecture
 
-This is a single-file React app — all logic and UI lives in `src/App.jsx`. There are no separate components, routing, or state management libraries.
+React app with no routing or state management libraries. `transactions` state lives in `App` and is passed down as props. There are no shared utilities or context.
 
-- `src/App.jsx` — entire app: transaction state, filtering, summary calculations, form handling, and JSX
+- `src/App.jsx` — root component; owns `transactions` state and `handleAdd`, composes child components
+- `src/Summary.jsx` — receives `transactions`, calculates and displays `totalIncome`, `totalExpenses`, and `balance`
+- `src/AddTransaction.jsx` — owns its own form state (`description`, `amount`, `type`, `category`), calls `onAdd` prop with new transaction
+- `src/TransactionList.jsx` — receives `transactions`, owns its own filter state (`filterType`, `filterCategory`), renders filtered table
 - `src/App.css` — component styles
 - `src/index.css` — global styles
 - `src/main.jsx` — React root mount
 
-### Known issues (intentional for the course)
-- `amount` is stored as a string, causing string concatenation instead of numeric addition in `totalIncome`/`totalExpenses`
-- The "Freelance Work" transaction is marked as `type: "expense"` but categorized as `"salary"`
-- UI is intentionally minimal/unstyled
+The `categories` array is duplicated in `AddTransaction` and `TransactionList` — a candidate for future extraction to a shared constants file.
+
+### Data flow for deletion
+`App` passes `handleDelete` as `onDelete` to `TransactionList`. Each row has a Delete button that triggers `window.confirm` before calling `onDelete(t.id)`, which filters the transaction out of state. Summary totals update automatically since `Summary` derives its values from the same `transactions` prop.
